@@ -1,0 +1,401 @@
+openapi: 3.2.0
+info:
+  title: Template API
+  version: 0.0.0
+tags:
+  - name: Todos
+paths:
+  /todos:
+    get:
+      operationId: listTodos
+      description: Todo の一覧を取得する
+      parameters:
+        - name: currentPage
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/CurrentPage'
+          explode: false
+        - name: perPage
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/PerPage'
+          explode: false
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListTodosResponse'
+        '500':
+          description: サーバーエラー（汎用）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+      tags:
+        - Todos
+    post:
+      operationId: createTodo
+      description: Todo を新規作成する
+      parameters: []
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTodoResponse'
+        '400':
+          description: リクエスト内容が不正（汎用）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        '500':
+          description: サーバーエラー（汎用）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+      tags:
+        - Todos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTodoRequest'
+  /todos/{id}:
+    get:
+      operationId: getTodo
+      description: ID を指定して Todo を取得する
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/TodoId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTodoResponse'
+        '404':
+          description: リソースが見つからない（汎用）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundError'
+        '500':
+          description: サーバーエラー（汎用）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+      tags:
+        - Todos
+    patch:
+      operationId: updateTodo
+      description: Todo を更新する。送った項目だけを更新する
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/TodoId'
+      responses:
+        '204':
+          description: 成功
+        '400':
+          description: リクエスト内容が不正（汎用）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        '404':
+          description: リソースが見つからない（汎用）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundError'
+        '500':
+          description: サーバーエラー（汎用）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+      tags:
+        - Todos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTodoRequest'
+    delete:
+      operationId: deleteTodo
+      description: Todo を削除する
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/TodoId'
+      responses:
+        '204':
+          description: 成功
+        '404':
+          description: リソースが見つからない（汎用）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundError'
+        '500':
+          description: サーバーエラー（汎用）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+      tags:
+        - Todos
+components:
+  schemas:
+    BadRequestError:
+      type: object
+      required:
+        - status
+        - code
+        - title
+      properties:
+        status:
+          type: number
+          enum:
+            - 400
+        code:
+          type: string
+          enum:
+            - '4000'
+        title:
+          $ref: '#/components/schemas/ErrorTitle'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+      description: リクエスト内容が不正（汎用）
+      title: BadRequestError
+      examples:
+        - status: 400
+          code: '4000'
+          title: リクエスト内容が不正です
+          errors:
+            - field: email
+              message: メールアドレスの形式が不正です
+    CreateTodoRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          $ref: '#/components/schemas/TodoTitle'
+      title: CreateTodoRequest
+    CreateTodoResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/TodoId'
+      title: CreateTodoResponse
+    CreatedAt:
+      type: string
+      format: date-time
+      description: 作成日時 (RFC 3339 / ISO 8601, PostgreSQL TIMESTAMPTZ互換)
+      title: CreatedAt
+      examples:
+        - '2025-01-01T12:00:00Z'
+    CurrentPage:
+      type: integer
+      minimum: 1
+      description: 現在のページ番号
+      title: CurrentPage
+    ErrorItem:
+      type: object
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+      description: エラーの内訳。どのフィールドがなぜ不正かを示す
+      title: ErrorItem
+    ErrorTitle:
+      type: string
+      description: エラーの表題。何が起きたかを1行で表す
+      title: ErrorTitle
+      examples:
+        - リクエスト内容が不正です
+    GetTodoResponse:
+      type: object
+      required:
+        - id
+        - title
+        - completed
+        - createdAt
+      properties:
+        id:
+          $ref: '#/components/schemas/TodoId'
+        title:
+          $ref: '#/components/schemas/TodoTitle'
+        completed:
+          $ref: '#/components/schemas/TodoCompleted'
+        createdAt:
+          $ref: '#/components/schemas/CreatedAt'
+      title: GetTodoResponse
+    InternalServerError:
+      type: object
+      required:
+        - status
+        - code
+        - title
+      properties:
+        status:
+          type: number
+          enum:
+            - 500
+        code:
+          type: string
+          enum:
+            - '5000'
+        title:
+          $ref: '#/components/schemas/ErrorTitle'
+      description: サーバー内部で予期せぬエラーが発生した（汎用）
+      title: InternalServerError
+      examples:
+        - status: 500
+          code: '5000'
+          title: サーバーで予期せぬエラーが発生しました
+    ListTodosPagination:
+      type: object
+      required:
+        - totalCount
+        - totalPages
+        - currentPage
+        - perPage
+      properties:
+        totalCount:
+          $ref: '#/components/schemas/TotalCount'
+        totalPages:
+          $ref: '#/components/schemas/TotalPages'
+        currentPage:
+          $ref: '#/components/schemas/CurrentPage'
+        perPage:
+          $ref: '#/components/schemas/PerPage'
+      title: ListTodosPagination
+    ListTodosResponse:
+      type: object
+      required:
+        - todos
+        - pagination
+      properties:
+        todos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListTodosResult'
+        pagination:
+          $ref: '#/components/schemas/ListTodosPagination'
+      title: ListTodosResponse
+    ListTodosResult:
+      type: object
+      required:
+        - id
+        - title
+        - completed
+        - createdAt
+      properties:
+        id:
+          $ref: '#/components/schemas/TodoId'
+        title:
+          $ref: '#/components/schemas/TodoTitle'
+        completed:
+          $ref: '#/components/schemas/TodoCompleted'
+        createdAt:
+          $ref: '#/components/schemas/CreatedAt'
+      title: ListTodosResult
+    PerPage:
+      type: integer
+      minimum: 1
+      description: 1ページあたりの件数
+      title: PerPage
+    ResourceNotFoundError:
+      type: object
+      required:
+        - status
+        - code
+        - title
+      properties:
+        status:
+          type: number
+          enum:
+            - 404
+        code:
+          type: string
+          enum:
+            - '4040'
+        title:
+          $ref: '#/components/schemas/ErrorTitle'
+      description: リソースが存在しない（汎用）
+      title: ResourceNotFoundError
+      examples:
+        - status: 404
+          code: '4040'
+          title: 指定されたリソースは存在しません
+    TodoCompleted:
+      type: boolean
+      description: Todo が完了しているか
+      title: TodoCompleted
+      examples:
+        - false
+    TodoId:
+      type: string
+      pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+      description: Todo の ID (UUID v7)
+      title: TodoId
+      examples:
+        - 018eef15-1234-7123-8123-123456789abc
+    TodoTitle:
+      type: string
+      minLength: 1
+      maxLength: 100
+      description: Todo のタイトル
+      title: TodoTitle
+      examples:
+        - 牛乳を買う
+    TotalCount:
+      type: integer
+      minimum: 0
+      description: 総件数
+      title: TotalCount
+    TotalPages:
+      type: integer
+      minimum: 0
+      description: 総ページ数
+      title: TotalPages
+    UpdateTodoRequest:
+      type: object
+      properties:
+        title:
+          $ref: '#/components/schemas/TodoTitle'
+        completed:
+          $ref: '#/components/schemas/TodoCompleted'
+      title: UpdateTodoRequest
+servers:
+  - url: http://localhost:8080
+    description: ローカルのバックエンド
+    variables: {}
