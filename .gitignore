@@ -9,6 +9,8 @@ lerna-debug.log*
 
 node_modules
 dist
+# schema/dist/openapi.yaml（TypeSpec の出力）は API 契約の差分を PR で見るためにコミットする
+!schema/dist/
 dist-ssr
 *.local
 
@@ -26,3 +28,6 @@ dist-ssr
 !.vscode/settings.json
 !.vscode/extensions.json
 .vitest/
+
+# 生成物（orval の API クライアントなど）。`vp install`（prepare）か `vp run gen:api` で作る
+src/generated/

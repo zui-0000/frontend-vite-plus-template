@@ -7,7 +7,8 @@
     "dev": "vp dev",
     "build": "tsc -b && vp build",
     "lint": "vp lint",
-    "preview": "vp preview"
+    "preview": "vp preview",
+    "prepare": "vp run gen:api"
   },
   "dependencies": {
     "react": "catalog:",
@@ -21,8 +22,13 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@typespec/compiler": "catalog:",
+    "@typespec/http": "catalog:",
+    "@typespec/openapi": "catalog:",
+    "@typespec/openapi3": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "jsdom": "catalog:",
+    "orval": "catalog:",
     "oxc-transform-react": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",

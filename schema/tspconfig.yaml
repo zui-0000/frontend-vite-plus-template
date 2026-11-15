@@ -1,0 +1,19 @@
+# TypeSpec のコンパイル設定。`tsp compile schema` で main.tsp から OpenAPI を出力する
+# kind: project … このディレクトリが TypeSpec プロジェクトの境界だと宣言する（IDE の判定と --config の継承に効く）
+kind: project
+entrypoint: main.tsp
+
+# 警告もエラーとして扱う（非推奨の書き方などを放置しないため）。typespec-schema-template には無い、このリポジトリだけの設定
+warn-as-error: true
+
+emit:
+  - "@typespec/openapi3"
+
+options:
+  "@typespec/openapi3":
+    # {project-root} はこのファイルがあるディレクトリ（schema/）
+    emitter-output-dir: "{project-root}/dist"
+    output-file: "openapi.yaml"
+    # typespec-schema-template と揃えて 3.2.0。orval 8.47.0 の生成結果は 3.1.0 のときと同じだと確かめてある
+    openapi-versions:
+      - "3.2.0"
