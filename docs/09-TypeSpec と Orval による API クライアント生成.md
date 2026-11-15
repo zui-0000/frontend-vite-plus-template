@@ -2,6 +2,8 @@
 
 記録日: 2026-11-15 / 対象: リポジトリ名 `vite-plus-prac` → `frontend-vite-plus-template`、`@typespec/*` 1.18.0、`orval` 8.47.0、`schema/`・`src/api/` の追加、スキーマの書き方を `typespec-schema-template` に合わせた、出力先を `schema/dist/`・`src/generated/api/` に変更（後者は `.gitignore`）
 
+> 追記: orval の出力は [docs/10](10-TanStack%20Query・Router・MSW・Zustand%20の導入.md) で、fetch のクライアントから TanStack Query のフックと MSW のハンドラーに変えた。`customFetch` もエラーの応答で throw するようにし、`src/utils/fetcher.ts` に移した。`.env` と `env.d.ts` も `src/env/` に移した。以下は、この時点の記録。
+
 検証用のリポジトリを、フロントエンドのテンプレートとして使えるようにした。あわせて、API の型とクライアントをスキーマから生成する仕組みを入れた。手順と、それぞれの理由を残す。
 
 ## まとめ

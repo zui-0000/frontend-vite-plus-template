@@ -1,5 +1,7 @@
 import path from "node:path";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
+import { msw } from "msw/vite";
 import { defineConfig, lazyPlugins } from "vite-plus";
 
 // https://vite.dev/config/
@@ -32,11 +34,13 @@ export default defineConfig({
       "schema/dist/**",
       // 生成物（.gitignore 済み）。整形の対象にしない
       "src/generated/**",
+      // TanStack Router が生成するルート定義（コミットする）。生成し直したときに差分が出ないよう整形しない
+      "src/routeTree.gen.ts",
     ],
   },
   lint: {
     // 生成したコードは手で直さないので lint しない（型チェックは tsc -b で行う）
-    ignorePatterns: ["src/generated/**"],
+    ignorePatterns: ["src/generated/**", "src/routeTree.gen.ts"],
     plugins: ["react", "typescript", "oxc"],
     rules: {
       "react/rules-of-hooks": "error",
@@ -75,6 +79,8 @@ export default defineConfig({
       },
     ],
   },
+  // .env を src/env/ に置く（既定はプロジェクトのルート）。型は src/env/env.d.ts
+  envDir: "src/env",
   resolve: {
     alias: {
       "~": path.resolve(import.meta.dirname, "src"),
@@ -85,5 +91,15 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/__setup__/setup.ts"],
   },
-  plugins: lazyPlugins(() => [react({ compiler: true })]),
+  plugins: lazyPlugins(() => [
+    // src/routes/ のファイルから src/routeTree.gen.ts を生成し、ルートごとにコードを分割する。
+    // react() より前に置く（後ろだと生成とコード分割が黙って動かない）
+    tanstackRouter({ target: "react", autoCodeSplitting: true }),
+    react({ compiler: true }),
+    // MSW の Service Worker のスクリプト（/mockServiceWorker.js）を開発サーバーで配信する。
+    // public/ にコピーしなくてよいので、msw を上げたときにスクリプトの更新し忘れが起きない。
+    // worker-only はスクリプトの配信だけ行うモード（実験的な virtual:msw は使わない）。
+    // ビルドに worker を出力しないよう、開発サーバーのときだけ使う
+    { ...msw({ mode: "worker-only" }), apply: "serve" },
+  ]),
 });
