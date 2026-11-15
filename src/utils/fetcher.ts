@@ -13,12 +13,18 @@ const parseBody = async (response: Response): Promise<unknown> => {
   return response.text();
 };
 
-// 戻り値の型 T は、orval が生成する { data, status, headers } のユニオン型。
-// status で絞り込むと data の型も決まる（200 なら GetTodoResponse、404 なら ResourceNotFoundError など）
+// 戻り値の型 T は、orval が生成する成功の応答（{ data, status, headers }）。
+// orval.config.ts の forceSuccessResponse により、エラーの応答は戻り値の型に入らない
 export const customFetch = async <T>(url: string, options: RequestInit): Promise<T> => {
   // 呼ぶたびに読む（テストで vi.stubEnv を使って差し替えられるように、モジュールの読み込み時に固定しない）
   const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
   const response = await fetch(`${baseUrl}${url}`, options);
   const data = await parseBody(response);
+  if (!response.ok) {
+    // エラーの本文（ResourceNotFoundError など）をそのまま投げる。
+    // TanStack Query の error に入り、orval が生成するエラーの型（TError）と一致する
+    // oxlint-disable-next-line typescript/only-throw-error
+    throw data;
+  }
   return { data, status: response.status, headers: response.headers } as T;
 };

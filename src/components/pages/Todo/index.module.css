@@ -1,0 +1,8 @@
+/* CSS Modules。クラス名はこのファイルの中だけで有効になる（ビルド時に一意な名前に変わる） */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 32px 20px;
+  text-align: left;
+}

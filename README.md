@@ -12,6 +12,8 @@ vp install                             # 依存関係を入れる（API クラ�
 vp dev                                 # http://localhost:5173/
 ```
 
+`vp dev` は既定で MSW のモック（`schema/` から生成）で API に応答する。本物のバックエンドにつなぐときは `src/env/.env.local` に `VITE_ENABLE_MSW=false` と書く。
+
 ## よく使うコマンド
 
 | コマンド                      | 内容                                                                     |
